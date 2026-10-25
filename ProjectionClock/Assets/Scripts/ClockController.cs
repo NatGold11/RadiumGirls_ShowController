@@ -1,8 +1,5 @@
 using System;
 using UnityEngine;
-#if ENABLE_INPUT_SYSTEM
-using UnityEngine.InputSystem;
-#endif
 
 /// <summary>
 /// Owns the show clock. Keeps its own time (never reads the system clock) so it
@@ -28,10 +25,8 @@ public class ClockController : MonoBehaviour
     [Tooltip("0 = no overshoot. ~1.7 gives a small mechanical bounce.")]
     [SerializeField, Range(0f, 4f)] float overshoot = 1.7f;
 
-    [Header("Debug (ShowController replaces this in step 4)")]
-    [SerializeField] bool debugKeys = true;
+    [Header("Debug")]
     [SerializeField] bool debugOverlay = true;
-    [SerializeField] string debugJumpTime = "11:59:50";
 
     public event Action OnTick;
     public event Action OnReset;
@@ -64,8 +59,6 @@ public class ClockController : MonoBehaviour
 
     void Update()
     {
-        if (debugKeys) HandleDebugKeys();
-
         if (running)
         {
             long before = WholeSeconds;
@@ -189,24 +182,6 @@ public class ClockController : MonoBehaviour
         if (hand != null) hand.localRotation = Quaternion.Euler(0f, 0f, -(float)degrees);
     }
 
-    void HandleDebugKeys()
-    {
-#if ENABLE_INPUT_SYSTEM
-        Keyboard kb = Keyboard.current;
-        if (kb == null) return;
-        bool toggle = kb.spaceKey.wasPressedThisFrame;
-        bool reset = kb.rKey.wasPressedThisFrame;
-        bool jump = kb.tKey.wasPressedThisFrame;
-#else
-        bool toggle = Input.GetKeyDown(KeyCode.Space);
-        bool reset = Input.GetKeyDown(KeyCode.R);
-        bool jump = Input.GetKeyDown(KeyCode.T);
-#endif
-        if (toggle) ToggleClock();
-        if (reset) ResetClock();
-        if (jump) SetTime(debugJumpTime);
-    }
-
     void OnGUI()
     {
         if (!debugOverlay) return;
@@ -224,8 +199,7 @@ public class ClockController : MonoBehaviour
             };
         }
 
-        var content = new GUIContent(
-            $"{TimeString}  {(running ? "RUNNING" : "STOPPED")}    [Space] start/stop   [R] reset   [T] jump to {debugJumpTime}");
+        var content = new GUIContent($"Clock: {TimeString}  {(running ? "RUNNING" : "STOPPED")}");
         Vector2 size = overlayStyle.CalcSize(content);
         GUI.Label(new Rect(10, 10, size.x, size.y), content, overlayStyle);
     }

@@ -5,9 +5,6 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
-#if ENABLE_INPUT_SYSTEM
-using UnityEngine.InputSystem;
-#endif
 
 /// <summary>
 /// Plays numbered videos and stills from StreamingAssets/Media on the clock face.
@@ -62,8 +59,7 @@ public class MediaManager : MonoBehaviour
     [SerializeField, Range(0f, 5f)] float crossfadeSeconds = 0f;
     [SerializeField] float prepareTimeout = 10f;
 
-    [Header("Debug (ShowController replaces this in step 4)")]
-    [SerializeField] bool debugKeys = true;
+    [Header("Debug")]
     [SerializeField] bool debugOverlay = true;
 
     public event Action OnListChanged;
@@ -107,11 +103,6 @@ public class MediaManager : MonoBehaviour
     void Start()
     {
         if (playFirstOnStart && items.Count > 0) Play(1);
-    }
-
-    void Update()
-    {
-        if (debugKeys) HandleDebugKeys();
     }
 
     void OnDestroy()
@@ -453,25 +444,6 @@ public class MediaManager : MonoBehaviour
 
     // ---- Debug ----
 
-    void HandleDebugKeys()
-    {
-#if ENABLE_INPUT_SYSTEM
-        Keyboard kb = Keyboard.current;
-        if (kb == null) return;
-        if (kb.nKey.wasPressedThisFrame) Next();
-        if (kb.pKey.wasPressedThisFrame) Previous();
-        if (kb.f5Key.wasPressedThisFrame) Rescan();
-        for (int i = 0; i < 9; i++)
-            if (kb[Key.Digit1 + i].wasPressedThisFrame) Play(i + 1);
-#else
-        if (Input.GetKeyDown(KeyCode.N)) Next();
-        if (Input.GetKeyDown(KeyCode.P)) Previous();
-        if (Input.GetKeyDown(KeyCode.F5)) Rescan();
-        for (int i = 0; i < 9; i++)
-            if (Input.GetKeyDown(KeyCode.Alpha1 + i)) Play(i + 1);
-#endif
-    }
-
     void OnGUI()
     {
         if (!debugOverlay) return;
@@ -497,8 +469,7 @@ public class MediaManager : MonoBehaviour
             state = IsVideoPlaying ? "  (playing)" : "  (holding last frame)";
 
         var content = new GUIContent(
-            $"Media ({items.Count}):  now {current}{state}   next {cued}\n" +
-            "[N] next   [P] prev   [1-9] play   [F5] rescan folder");
+            $"Media ({items.Count}):  now {current}{state}   next {cued}");
         Vector2 size = overlayStyle.CalcSize(content);
         GUI.Label(new Rect(10, 60, size.x, size.y), content, overlayStyle);
     }
