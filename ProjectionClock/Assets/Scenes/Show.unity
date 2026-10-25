@@ -274,6 +274,60 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 49478033}
   m_CullTransparentMesh: 1
+--- !u!1 &129816698
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 129816700}
+  - component: {fileID: 129816699}
+  m_Layer: 0
+  m_Name: OutputManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &129816699
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 129816698}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c994045bf538bff4281ecde2670f9c00, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outputCanvas: {fileID: 1338248329}
+  fallbackResolution: {x: 1920, y: 1080}
+  showPreview: 1
+  regions:
+  - {fileID: 49478034}
+  calibrationFileName: calibration.json
+  moveSpeed: 200
+  scaleSpeed: 0.25
+  rotateSpeed: 20
+  fineFactor: 0.1
+--- !u!4 &129816700
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 129816698}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 177.12294, y: 166.94075, z: -2.202418}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -650,7 +704,6 @@ MonoBehaviour:
   wrapAround: 0
   crossfadeSeconds: 0
   prepareTimeout: 10
-  debugKeys: 1
   debugOverlay: 1
 --- !u!4 &485293728
 Transform:
@@ -1171,6 +1224,89 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1932550145
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1932550147}
+  - component: {fileID: 1932550146}
+  m_Layer: 0
+  m_Name: ShowController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1932550146
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1932550145}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0f69eaf81cbc1b4c9aeccde8854540e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  clock: {fileID: 0}
+  media: {fileID: 0}
+  output: {fileID: 0}
+  keyboardEnabled: 1
+  keyBindings:
+  - key: 1
+    command: clock/toggle
+  - key: 32
+    command: clock/reset
+  - key: 34
+    command: clock/set 11:59:50
+  - key: 28
+    command: media/next
+  - key: 30
+    command: media/prev
+  - key: 41
+    command: media/play 1
+  - key: 42
+    command: media/play 2
+  - key: 43
+    command: media/play 3
+  - key: 44
+    command: media/play 4
+  - key: 45
+    command: media/play 5
+  - key: 46
+    command: media/play 6
+  - key: 47
+    command: media/play 7
+  - key: 48
+    command: media/play 8
+  - key: 49
+    command: media/play 9
+  - key: 98
+    command: media/rescan
+  - key: 17
+    command: calibrate/toggle
+  logCommands: 1
+  debugOverlay: 1
+--- !u!4 &1932550147
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1932550145}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 177.12294, y: 166.94075, z: -2.202418}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2033205747
 GameObject:
   m_ObjectHideFlags: 0
@@ -1209,9 +1345,7 @@ MonoBehaviour:
   runOnStart: 0
   tickDuration: 0.1
   overshoot: 1.7
-  debugKeys: 1
   debugOverlay: 1
-  debugJumpTime: 11:59:50
 --- !u!4 &2033205749
 Transform:
   m_ObjectHideFlags: 0
@@ -1313,3 +1447,5 @@ SceneRoots:
   - {fileID: 387349784}
   - {fileID: 2033205749}
   - {fileID: 485293728}
+  - {fileID: 1932550147}
+  - {fileID: 129816700}

@@ -41,6 +41,7 @@ public class ShowController : MonoBehaviour
     [Header("Components (found automatically if left empty)")]
     [SerializeField] ClockController clock;
     [SerializeField] MediaManager media;
+    [SerializeField] OutputManager output;
 
     [Header("Keyboard (backup control; only works while this window has focus)")]
     [SerializeField] bool keyboardEnabled = true;
@@ -62,8 +63,13 @@ public class ShowController : MonoBehaviour
         new KeyBinding(Key.Digit8, "media/play 8"),
         new KeyBinding(Key.Digit9, "media/play 9"),
         new KeyBinding(Key.F5, "media/rescan"),
+        new KeyBinding(Key.C, "calibrate/toggle"),
     };
 #endif
+
+    [Header("Quit")]
+    [Tooltip("show/quit must be sent twice within this many seconds, so one stray press can't end the show.")]
+    [SerializeField] float quitConfirmSeconds = 3f;
 
     [Header("Debug")]
     [SerializeField] bool logCommands = true;
@@ -77,6 +83,7 @@ public class ShowController : MonoBehaviour
     readonly List<CommandInfo> commands = new List<CommandInfo>();
     readonly ConcurrentQueue<string> pending = new ConcurrentQueue<string>();
 
+    float quitArmedUntil = -1f;
     string lastCommand = "";
     bool lastSucceeded;
     string typedCommand = "";
@@ -89,12 +96,15 @@ public class ShowController : MonoBehaviour
     {
         if (clock == null) clock = FindFirstObjectByType<ClockController>();
         if (media == null) media = FindFirstObjectByType<MediaManager>();
+        if (output == null) output = FindFirstObjectByType<OutputManager>();
         RegisterCommands();
     }
 
     void Update()
     {
         while (pending.TryDequeue(out string command)) Execute(command);
+
+        if (output != null) output.KeyboardBlocked = commandBoxFocused;
 
 #if ENABLE_INPUT_SYSTEM
         if (keyboardEnabled && !commandBoxFocused) HandleKeyboard();
@@ -131,6 +141,18 @@ public class ShowController : MonoBehaviour
             Debug.LogWarning("ShowController: no MediaManager in the scene, media/* commands are disabled.");
         }
 
+        if (output != null)
+        {
+            Register("calibrate/toggle", "", _ => { output.ToggleCalibrating(); return true; });
+            Register("calibrate/on", "", _ => { output.SetCalibrating(true); return true; });
+            Register("calibrate/off", "", _ => { output.SetCalibrating(false); return true; });
+            Register("calibrate/save", "", _ => { output.SaveCalibration(); return true; });
+        }
+        else
+        {
+            Debug.LogWarning("ShowController: no OutputManager in the scene, calibrate/* commands are disabled.");
+        }
+
         if (clock != null && media != null)
         {
             Register("show/reset", "", _ =>
@@ -139,6 +161,27 @@ public class ShowController : MonoBehaviour
                 return media.Play(1);
             });
         }
+
+        Register("show/quit", "send twice to confirm", _ => Quit());
+    }
+
+    /// <summary>The first show/quit only arms it; a second one within quitConfirmSeconds closes the app.</summary>
+    bool Quit()
+    {
+        if (Time.unscaledTime > quitArmedUntil)
+        {
+            quitArmedUntil = Time.unscaledTime + quitConfirmSeconds;
+            Debug.LogWarning($"ShowController: send show/quit again within {quitConfirmSeconds:0} seconds to close the show.");
+            return true;
+        }
+
+        if (output != null) output.SetCalibrating(false); // saves calibration if it was open
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+        return true;
     }
 
     void Register(string name, string usage, Handler handler)
@@ -209,9 +252,12 @@ public class ShowController : MonoBehaviour
     {
         Keyboard kb = Keyboard.current;
         if (kb == null) return;
+        // Calibration mode uses the keyboard itself, so only calibrate/* shortcuts stay live.
+        bool calibrating = output != null && output.IsCalibrating;
         foreach (KeyBinding binding in keyBindings)
         {
             if (binding.key == Key.None || string.IsNullOrWhiteSpace(binding.command)) continue;
+            if (calibrating && !binding.command.TrimStart('/').StartsWith("calibrate/", StringComparison.OrdinalIgnoreCase)) continue;
             if (kb[binding.key].wasPressedThisFrame) Execute(binding.command);
         }
     }
@@ -254,6 +300,7 @@ public class ShowController : MonoBehaviour
         }
 
         string last = lastCommand.Length == 0 ? "none" : $"{lastCommand}  {(lastSucceeded ? "(ok)" : "(FAILED - see Console)")}";
+        if (Time.unscaledTime <= quitArmedUntil) last += "   << send show/quit again to close >>";
         var content = new GUIContent($"Last command: {last}\n{KeyHints()}");
         Vector2 size = overlayStyle.CalcSize(content);
         GUI.Label(new Rect(10, 110, size.x, size.y), content, overlayStyle);
