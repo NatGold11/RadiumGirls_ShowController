@@ -158,7 +158,7 @@ public class ShowController : MonoBehaviour
             Register("show/reset", "", _ =>
             {
                 clock.ResetClock();
-                return media.Play(1);
+                return media.PlayFirst();
             });
         }
 
